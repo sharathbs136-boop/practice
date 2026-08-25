@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory
+  namespace: microshop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory
+  template:
+    metadata:
+      labels:
+        app: inventory
+    spec:
+      containers:
+        - name: inventory
+          image: ${ACR_LOGIN_SERVER}/inventory:${IMAGE_TAG}
+          env:
+            - name: DB_PATH
+              value: /data/inventory.db
+          volumeMounts:
+            - name: inventory-data
+              mountPath: /data
+          ports:
+            - containerPort: 8001
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 3
+      volumes:
+        - name: inventory-data
+          persistentVolumeClaim:
+            claimName: inventory-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inventory
+  namespace: microshop
+spec:
+  selector:
+    app: inventory
+  ports:
+    - port: 8001
+      targetPort: 8001

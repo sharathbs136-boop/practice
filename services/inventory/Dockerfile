@@ -1,0 +1,5 @@
+FROM python:3.12-slim
+WORKDIR /app
+COPY src/ .
+EXPOSE 8001
+CMD ["python", "app.py"]

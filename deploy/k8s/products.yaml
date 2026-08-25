@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: products
+  namespace: microshop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: products
+  template:
+    metadata:
+      labels:
+        app: products
+    spec:
+      containers:
+        - name: products
+          image: ${ACR_LOGIN_SERVER}/products:${IMAGE_TAG}
+          env:
+            - name: DB_PATH
+              value: /data/products.db
+          volumeMounts:
+            - name: products-data
+              mountPath: /data
+          ports:
+            - containerPort: 8002
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8002
+            initialDelaySeconds: 3
+      volumes:
+        - name: products-data
+          persistentVolumeClaim:
+            claimName: products-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: products
+  namespace: microshop
+spec:
+  selector:
+    app: products
+  ports:
+    - port: 8002
+      targetPort: 8002

@@ -1,0 +1,106 @@
+services:
+  auth:
+    build: ./services/auth
+    environment:
+      PORT: 8003
+      AUTH_SECRET: microshop-local-secret
+    ports:
+      - "8003:8003"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  products:
+    build: ./services/products
+    environment:
+      PORT: 8002
+      DB_PATH: /data/products.db
+      ZIPKIN_URL: http://zipkin:9411
+      AUTH_SECRET: microshop-local-secret
+    volumes:
+      - products-data:/data
+    ports:
+      - "8002:8002"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  inventory:
+    build: ./services/inventory
+    environment:
+      PORT: 8001
+      DB_PATH: /data/inventory.db
+      ZIPKIN_URL: http://zipkin:9411
+      AUTH_SECRET: microshop-local-secret
+    volumes:
+      - inventory-data:/data
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  orders:
+    build: ./services/orders
+    environment:
+      PORT: 8000
+      INVENTORY_URL: http://inventory:8001
+      DB_PATH: /data/orders.db
+      ZIPKIN_URL: http://zipkin:9411
+      AUTH_SECRET: microshop-local-secret
+    volumes:
+      - orders-data:/data
+    depends_on:
+      inventory:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      products:
+        condition: service_healthy
+      orders:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+    ports:
+      - "8086:80"
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./ops/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  grafana:
+    image: grafana/grafana:12.1.1
+    ports:
+      - "3002:3000"
+    depends_on:
+      - prometheus
+    volumes:
+      - ./ops/monitoring/grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+      - ./ops/monitoring/grafana-dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml:ro
+      - ./ops/monitoring/microshop-dashboard.json:/var/lib/grafana/dashboards/microshop.json:ro
+
+  zipkin:
+    image: openzipkin/zipkin:3
+
+volumes:
+  products-data:
+  inventory-data:
+  orders-data:

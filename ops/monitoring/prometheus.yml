@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: products
+    static_configs:
+      - targets: [products:8002]
+  - job_name: inventory
+    static_configs:
+      - targets: [inventory:8001]
+  - job_name: orders
+    static_configs:
+      - targets: [orders:8000]

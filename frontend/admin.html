@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin workspace | Microshop</title>
+  <link rel="stylesheet" href="/styles.css?v=20260825-3">
+</head>
+<body class="admin-page">
+  <header class="admin-top page-width"><a class="brand" href="/"><span class="brand-mark">M</span><span>MICRO<span>SHOP</span><small>admin workspace</small></span></a><a href="/">← Back to storefront</a></header>
+  <main class="admin-main page-width">
+    <div class="admin-heading"><div><p class="eyebrow">INTERNAL TOOL</p><h1>Product workspace</h1><p>Create products, choose their category, and enable stock before publishing.</p></div><span class="status"><i></i> Admin only</span></div>
+    <section class="admin-area"><form id="product-form" class="product-form"><input name="name" placeholder="Product name" required><select name="category" required><option value="">Choose category</option><option>Safety</option><option>Tools</option><option>Electrical</option><option>Plumbing</option><option>Cleaning</option><option>Material Handling</option><option>Fasteners</option></select><input name="price" type="number" min="0.01" step="0.01" placeholder="Price" required><button type="submit">Submit for review</button></form><p id="admin-message" role="status"></p><div id="admin-products" class="admin-list"></div></section>
+  </main>
+  <script type="module" src="/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Microshop</title>
+  <link rel="stylesheet" href="/styles.css?v=20260825-2">
+</head>
+<body>
+  <div class="utility"><div class="page-width"><span>Microshop for every worksite</span><nav><a href="/admin.html">Admin workspace</a><a href="#">Help</a><a href="/signin.html" id="session-link">Sign in</a></nav></div></div>
+  <header class="site-header page-width">
+    <a class="brand" href="/"><span class="brand-mark">M</span><span>MICRO<span>SHOP</span><small>industrial supply lab</small></span></a>
+    <form class="search" onsubmit="return false"><input aria-label="Search products" placeholder="What can we help you find?"><button type="button" title="Search">⌕</button></form>
+    <div class="header-actions"><button type="button" class="location">Deliver to<br><strong>Practice site</strong></button><button type="button" class="cart">Cart <b>0</b></button></div>
+  </header>
+  <nav class="category-nav"><div class="page-width"><button class="all-products" type="button" data-category="all">☰ &nbsp; All Products</button><a href="#catalog" data-category="Safety">Safety</a><a href="#catalog" data-category="Tools">Tools</a><a href="#catalog" data-category="Electrical">Electrical</a><a href="#catalog" data-category="Plumbing">Plumbing</a><a href="#catalog" data-category="Cleaning">Cleaning</a><a href="#catalog" data-category="Material Handling">Material Handling</a><a href="#catalog" data-category="Fasteners">Fasteners</a></div></nav>
+  <main>
+    <section class="hero page-width"><div class="hero-copy"><p class="eyebrow">THE WORKSITE STARTS HERE</p><h1>Built for the<br><strong>work ahead.</strong></h1><p>Reliable supplies, ready when your team needs them. Explore the catalog and order in a few clicks.</p><a class="hero-link" href="#catalog">Shop the catalog <span>→</span></a></div><div class="hero-image"><span>NEW ARRIVALS</span></div></section>
+    <section class="category-strip page-width"><h2>Shop by category</h2><div class="category-grid"><a href="#catalog" data-category="Safety"><span class="category-art safety"></span><strong>Safety &amp; Security</strong></a><a href="#catalog" data-category="Tools"><span class="category-art tools"></span><strong>Tools &amp; Equipment</strong></a><a href="#catalog" data-category="Electrical"><span class="category-art electrical"></span><strong>Electrical</strong></a><a href="#catalog" data-category="Cleaning"><span class="category-art cleaning"></span><strong>Cleaning &amp; Janitorial</strong></a><a href="#catalog" data-category="Plumbing"><span class="category-art plumbing"></span><strong>Plumbing &amp; Pumps</strong></a><a href="#catalog" data-category="Material Handling"><span class="category-art handling"></span><strong>Material Handling</strong></a></div></section>
+    <section id="catalog" class="catalog page-width"><div class="catalog-heading"><div><p class="eyebrow">LIVE INVENTORY</p><h2 id="catalog-title">Popular products</h2></div><span class="live-label"><i></i> Updates every 5 seconds</span></div><div id="message" role="status"></div><div id="products" class="product-grid" aria-live="polite"><p class="loading">Loading catalog...</p></div></section>
+    <section class="orders-area page-width"><div class="section-heading"><span>03</span><h2>Recent orders</h2></div><div id="orders" class="order-list" aria-live="polite"><p class="loading">Loading orders...</p></div></section>
+  </main>
+  <footer><div class="page-width"><strong>MICROSHOP</strong><span>Service-powered procurement practice environment</span><span>© 2026</span></div></footer>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

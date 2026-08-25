@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in | Microshop</title>
+  <link rel="stylesheet" href="/styles.css?v=20260825-3">
+</head>
+<body class="account-page">
+  <main class="account-shell">
+    <a class="brand" href="/"><span class="brand-mark">M</span><span>MICRO<span>SHOP</span><small>industrial supply lab</small></span></a>
+    <section class="account-panel">
+      <div><p class="eyebrow">ACCOUNT ACCESS</p><h1>Welcome back.</h1><p>Sign in to place orders, or create a customer account.</p></div>
+      <div class="account-forms">
+        <form id="login-form" class="account-form"><h2>Sign in</h2><input name="username" placeholder="Username" autocomplete="username" required><input name="password" type="password" placeholder="Password" autocomplete="current-password" required><button type="submit">Sign in</button></form>
+        <form id="register-form" class="account-form"><h2>New customer</h2><input name="username" placeholder="Choose a username" autocomplete="username" required><input name="password" type="password" placeholder="Password, 6+ characters" autocomplete="new-password" required><button type="submit">Create account</button></form>
+      </div>
+      <p id="account-message" class="account-message" role="status"></p>
+    </section>
+  </main>
+  <script type="module" src="/signin.js"></script>
+</body>
+</html>
