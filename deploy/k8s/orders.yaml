@@ -4,7 +4,7 @@ metadata:
   name: orders
   namespace: microshop
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: orders
@@ -19,8 +19,15 @@ spec:
           env:
             - name: INVENTORY_URL
               value: http://inventory:8001
+            - name: PAYMENT_URL
+              value: http://payments:8004
             - name: DB_PATH
               value: /data/orders.db
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: microshop-secrets
+                  key: auth-secret
           volumeMounts:
             - name: orders-data
               mountPath: /data

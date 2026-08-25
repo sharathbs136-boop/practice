@@ -1,5 +1,6 @@
 import json
 import os
+import queue
 import sqlite3
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -33,6 +34,14 @@ def rows_to_products(rows):
 
 
 init_db()
+SUBSCRIBERS = set()
+
+
+def broadcast_products():
+    with connection() as database:
+        products = rows_to_products(database.execute("SELECT * FROM products WHERE status = 'active'").fetchall())
+    for subscriber in list(SUBSCRIBERS):
+        subscriber.put(products)
 
 
 class ProductsHandler(BaseHTTPRequestHandler):
@@ -50,7 +59,27 @@ class ProductsHandler(BaseHTTPRequestHandler):
         emit_span(request_trace, f"products.{self.command}", started)
 
     def do_GET(self):
-        if self.path == "/metrics":
+        if self.path == "/events":
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Connection", "keep-alive")
+            self.end_headers()
+            subscriber = queue.Queue()
+            SUBSCRIBERS.add(subscriber)
+            try:
+                while True:
+                    try:
+                        payload = subscriber.get(timeout=15)
+                        self.wfile.write(f"data: {json.dumps(payload)}\n\n".encode())
+                    except queue.Empty:
+                        self.wfile.write(b": keep-alive\n\n")
+                    self.wfile.flush()
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+            finally:
+                SUBSCRIBERS.discard(subscriber)
+        elif self.path == "/metrics":
             with connection() as database:
                 total = database.execute("SELECT COUNT(*) FROM products").fetchone()[0]
                 active = database.execute("SELECT COUNT(*) FROM products WHERE status = 'active'").fetchone()[0]
@@ -93,6 +122,7 @@ class ProductsHandler(BaseHTTPRequestHandler):
             with connection() as database:
                 database.execute("INSERT INTO products VALUES (?, ?, ?, ?, ?)", tuple(product.values()))
             self._send(201, product)
+            broadcast_products()
         except (KeyError, ValueError, json.JSONDecodeError):
             self._send(400, {"error": "expected name, category, and positive price"})
 
@@ -112,6 +142,7 @@ class ProductsHandler(BaseHTTPRequestHandler):
             self._send(404, {"error": "product not found"})
             return
         self._send(200, dict(product))
+        broadcast_products()
 
     def log_message(self, format, *args):
         print(f"products: {format % args}")

@@ -88,10 +88,10 @@ class InventoryHandler(BaseHTTPRequestHandler):
             self._send(404, {"error": "not found"})
 
     def do_POST(self):
-        if self.path not in ("/reserve", "/stock/enable"):
+        if self.path not in ("/reserve", "/stock/enable", "/stock/restock"):
             self._send(404, {"error": "not found"})
             return
-        if self.path == "/stock/enable" and not is_admin(self.headers.get("Authorization")):
+        if self.path in ("/stock/enable", "/stock/restock") and not is_admin(self.headers.get("Authorization")):
             self._send(401, {"error": "admin authentication required"})
             return
         try:
@@ -105,6 +105,15 @@ class InventoryHandler(BaseHTTPRequestHandler):
                 if self.path == "/stock/enable":
                     database.execute("INSERT INTO stock(sku, quantity) VALUES (?, ?) ON CONFLICT(sku) DO UPDATE SET quantity = excluded.quantity", (sku, quantity))
                     self._send(200, {"enabled": True, "sku": sku, "quantity": quantity})
+                    broadcast_stock()
+                    return
+                if self.path == "/stock/restock":
+                    updated = database.execute("UPDATE stock SET quantity = quantity + ? WHERE sku = ?", (quantity, sku)).rowcount
+                    if updated == 0:
+                        self._send(404, {"error": "stock item not found"})
+                        return
+                    total = database.execute("SELECT quantity FROM stock WHERE sku = ?", (sku,)).fetchone()[0]
+                    self._send(200, {"restocked": True, "sku": sku, "added": quantity, "quantity": total})
                     broadcast_stock()
                     return
                 updated = database.execute("UPDATE stock SET quantity = quantity - ? WHERE sku = ? AND quantity >= ?", (quantity, sku, quantity)).rowcount

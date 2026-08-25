@@ -19,6 +19,11 @@ spec:
           env:
             - name: DB_PATH
               value: /data/inventory.db
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: microshop-secrets
+                  key: auth-secret
           volumeMounts:
             - name: inventory-data
               mountPath: /data

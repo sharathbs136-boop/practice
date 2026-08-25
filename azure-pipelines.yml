@@ -63,10 +63,18 @@ stages:
               repository: frontend
               Dockerfile: frontend/Dockerfile
               tags: $(imageTag)
+          - task: Docker@2
+            displayName: Build and push payments image
+            inputs:
+              command: buildAndPush
+              containerRegistry: $(ACR_SERVICE_CONNECTION)
+              repository: payments
+              Dockerfile: services/payments/Dockerfile
+              tags: $(imageTag)
           - bash: |
               set -euo pipefail
               curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
-              for image in inventory orders products frontend; do
+              for image in inventory orders products frontend payments; do
                 trivy image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed "$(acrLoginServer)/$image:$(imageTag)"
               done
             displayName: Scan images with Trivy
@@ -91,7 +99,7 @@ stages:
                     inlineScript: |
                       az aks get-credentials --resource-group $(AKS_RESOURCE_GROUP) --name $(AKS_NAME) --overwrite-existing
                       sed -i "s|\${ACR_LOGIN_SERVER}|$(acrLoginServer)|g; s|\${IMAGE_TAG}|$(imageTag)|g" deploy/k8s/*.yaml
-                      kubectl apply -f deploy/k8s/ -n microshop
+                      find deploy/k8s -type f ! -name 'secrets.example.yaml' -print0 | xargs -0 kubectl apply -n microshop -f
                       kubectl rollout status deployment/frontend -n microshop --timeout=120s
 
   - stage: QA
@@ -114,7 +122,7 @@ stages:
                     inlineScript: |
                       az aks get-credentials --resource-group $(AKS_RESOURCE_GROUP) --name $(AKS_NAME) --overwrite-existing
                       sed -i "s|\${ACR_LOGIN_SERVER}|$(acrLoginServer)|g; s|\${IMAGE_TAG}|$(imageTag)|g" deploy/k8s/*.yaml
-                      kubectl apply -f deploy/k8s/ -n microshop
+                      find deploy/k8s -type f ! -name 'secrets.example.yaml' -print0 | xargs -0 kubectl apply -n microshop -f
                       kubectl rollout status deployment/frontend -n microshop --timeout=120s
 
   - stage: UAT
@@ -137,7 +145,7 @@ stages:
                     inlineScript: |
                       az aks get-credentials --resource-group $(AKS_RESOURCE_GROUP) --name $(AKS_NAME) --overwrite-existing
                       sed -i "s|\${ACR_LOGIN_SERVER}|$(acrLoginServer)|g; s|\${IMAGE_TAG}|$(imageTag)|g" deploy/k8s/*.yaml
-                      kubectl apply -f deploy/k8s/ -n microshop
+                      find deploy/k8s -type f ! -name 'secrets.example.yaml' -print0 | xargs -0 kubectl apply -n microshop -f
                       kubectl rollout status deployment/frontend -n microshop --timeout=120s
 
   - stage: Prod
@@ -160,5 +168,5 @@ stages:
                     inlineScript: |
                       az aks get-credentials --resource-group $(AKS_RESOURCE_GROUP) --name $(AKS_NAME) --overwrite-existing
                       sed -i "s|\${ACR_LOGIN_SERVER}|$(acrLoginServer)|g; s|\${IMAGE_TAG}|$(imageTag)|g" deploy/k8s/*.yaml
-                      kubectl apply -f deploy/k8s/ -n microshop
+                      find deploy/k8s -type f ! -name 'secrets.example.yaml' -print0 | xargs -0 kubectl apply -n microshop -f
                       kubectl rollout status deployment/frontend -n microshop --timeout=120s

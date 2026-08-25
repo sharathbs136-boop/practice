@@ -1,52 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: products
+  name: auth
   namespace: microshop
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: products
+      app: auth
   template:
     metadata:
       labels:
-        app: products
+        app: auth
     spec:
       containers:
-        - name: products
-          image: ${ACR_LOGIN_SERVER}/products:${IMAGE_TAG}
+        - name: auth
+          image: ${ACR_LOGIN_SERVER}/auth:${IMAGE_TAG}
           env:
-            - name: DB_PATH
-              value: /data/products.db
             - name: AUTH_SECRET
               valueFrom:
                 secretKeyRef:
                   name: microshop-secrets
                   key: auth-secret
-          volumeMounts:
-            - name: products-data
-              mountPath: /data
           ports:
-            - containerPort: 8002
+            - containerPort: 8003
           readinessProbe:
             httpGet:
               path: /health
-              port: 8002
+              port: 8003
             initialDelaySeconds: 3
-      volumes:
-        - name: products-data
-          persistentVolumeClaim:
-            claimName: products-data
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: products
+  name: auth
   namespace: microshop
 spec:
   selector:
-    app: products
+    app: auth
   ports:
-    - port: 8002
-      targetPort: 8002
+    - port: 8003
+      targetPort: 8003
